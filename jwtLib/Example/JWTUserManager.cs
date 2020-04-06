@@ -1,0 +1,112 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+using jwtLib.JWTAuth.Interfaces;
+using System.Security.Claims;
+using System.Threading.Tasks;
+
+namespace jwtLib.Example
+{
+
+    public class JWTUserManager : IJWTUserManager
+    {
+        private DataBase _db;
+
+        public JWTUserManager(DataBase db)
+        {
+            _db = db;
+        }
+
+        //public async Task<bool> CheckPasswordAsync(IJWTUser jwtUser, string password)
+        //{
+        //    if (!(jwtUser is User user))
+        //    {
+        //        return false;
+        //    }
+        //    string passwordHash = password.GetHashCode().ToString();
+        //    return _db.Users.Any(x1=>x1.Id==user.Id&&x1.HashPassword== passwordHash);
+        //}
+
+        public async Task DeleteRefreshTokenFromUserAsync(string userId, string refreshTokenHash)
+        {
+            var user = _db.Users.FirstOrDefault(x1 => x1.Id == userId && x1.RefreshTokenHash == refreshTokenHash);
+            if (user == null)
+                return;
+            user.RefreshTokenHash = null;
+        }
+
+        //public async Task<IJWTUser> GetByNameAsync(string name)
+        //{
+        //    throw new System.NotImplementedException();
+        //}
+
+        //public async Task<ClaimsIdentity> GetIdentityAsync(string username, string password, string authenticationType)
+        //{
+        //    var user = await this.GetUserAsync(username, password);
+
+        //    return await this.GetIdentityAsync(user, authenticationType);
+        //}
+
+        public async Task<ClaimsIdentity> GetIdentityAsync(IJWTUser user, string authenticationType)
+        {
+            if (user == null)
+                return null;
+
+            var claims = new List<Claim>
+            {
+                new Claim(type: ClaimsIdentity.DefaultNameClaimType,
+                    value: await this.GetUserIdAsync(user)),
+                //new Claim(type:ClaimTypes.Name,value:user.UserName)//,
+                new Claim(type: ClaimsIdentity.DefaultRoleClaimType, value: "testRole")
+            };
+            ClaimsIdentity claimsIdentity =
+                new ClaimsIdentity(claims, authenticationType, ClaimsIdentity.DefaultNameClaimType,
+                    ClaimsIdentity.DefaultRoleClaimType);
+            return claimsIdentity;
+        }
+
+        //public async Task<ClaimsIdentity> GetIdentityGetIdentityAsync(string username, string password,
+        //    string authenticationType)
+        //{
+        //    throw new System.NotImplementedException();
+        //}
+
+        public async Task<string> GetIdFromClaimsAsync(ClaimsPrincipal claims)
+        {
+            return claims?.Identity?.Name;
+        }
+
+        public async Task<string> GetIdFromClaimsAsync(IEnumerable<Claim> claims)
+        {
+            return claims.FirstOrDefault(x1 => x1.Type == ClaimsIdentity.DefaultNameClaimType)?.Value;
+        }
+
+        public async Task<IJWTUser> GetUserAsync(string username, string password)
+        {
+            string passwordHash = password.GetHashCode().ToString();
+            return _db.Users.FirstOrDefault(x1 => x1.UserName == username && x1.HashPassword == passwordHash);
+        }
+
+        public async Task<string> GetUserIdAsync(IJWTUser jwtUser)
+        {
+            var user = jwtUser as User;
+            return user?.Id;
+        }
+
+        public async Task<IJWTUser> GetWithRefreshTokenAsync(string userId, string refreshTokenHash)
+        {
+            return _db.Users.FirstOrDefault(x1 => x1.Id == userId && x1.RefreshTokenHash == refreshTokenHash);
+        }
+
+        //public async Task SetRefreshTokenAsync(string userId, string refreshToken)
+        //{
+        //    throw new System.NotImplementedException();
+        //}
+
+        public async Task SetRefreshTokenAsync(IJWTUser jwtUser, string refreshTokenHash)
+        {
+            var user = jwtUser as User;
+            var userFromDb = _db.Users.FirstOrDefault(x1 => x1.Id == user.Id);
+            userFromDb.RefreshTokenHash = refreshTokenHash;
+        }
+    }
+}
