@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace jwtLib.JWTAuth.Models
 {
-    public class JWTService
+    public class JWTService : IJWTService
     {
         private IJWTUserManager _JWTUserManager;
         private IJWTSettings _settings;
