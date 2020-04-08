@@ -16,15 +16,6 @@ namespace jwtLib.Example
             _db = db;
         }
 
-        //public async Task<bool> CheckPasswordAsync(IJWTUser jwtUser, string password)
-        //{
-        //    if (!(jwtUser is User user))
-        //    {
-        //        return false;
-        //    }
-        //    string passwordHash = password.GetHashCode().ToString();
-        //    return _db.Users.Any(x1=>x1.Id==user.Id&&x1.HashPassword== passwordHash);
-        //}
 
         public async Task DeleteRefreshTokenFromUserAsync(string userId, string refreshTokenHash)
         {
@@ -34,17 +25,6 @@ namespace jwtLib.Example
             user.RefreshTokenHash = null;
         }
 
-        //public async Task<IJWTUser> GetByNameAsync(string name)
-        //{
-        //    throw new System.NotImplementedException();
-        //}
-
-        //public async Task<ClaimsIdentity> GetIdentityAsync(string username, string password, string authenticationType)
-        //{
-        //    var user = await this.GetUserAsync(username, password);
-
-        //    return await this.GetIdentityAsync(user, authenticationType);
-        //}
 
         public async Task<ClaimsIdentity> GetIdentityAsync(IJWTUser user, string authenticationType)
         {
@@ -64,11 +44,6 @@ namespace jwtLib.Example
             return claimsIdentity;
         }
 
-        //public async Task<ClaimsIdentity> GetIdentityGetIdentityAsync(string username, string password,
-        //    string authenticationType)
-        //{
-        //    throw new System.NotImplementedException();
-        //}
 
         public async Task<string> GetIdFromClaimsAsync(ClaimsPrincipal claims)
         {
@@ -97,10 +72,6 @@ namespace jwtLib.Example
             return _db.Users.FirstOrDefault(x1 => x1.Id == userId && x1.RefreshTokenHash == refreshTokenHash);
         }
 
-        //public async Task SetRefreshTokenAsync(string userId, string refreshToken)
-        //{
-        //    throw new System.NotImplementedException();
-        //}
 
         public async Task SetRefreshTokenAsync(IJWTUser jwtUser, string refreshTokenHash)
         {

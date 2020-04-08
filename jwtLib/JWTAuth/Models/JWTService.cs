@@ -25,7 +25,12 @@ namespace jwtLib.JWTAuth.Models
             _tokenHandler = tokenHandler;
         }
 
-
+        /// <summary>
+        /// refresh main token, before refresh check main token, it should be in "Good" or "ExpiredToken" status
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="refreshToken"></param>
+        /// <returns></returns>
         public async Task<AllTokens> Refresh([NotNull] string userId, [NotNull] string refreshToken)
         {
             if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(refreshToken))
@@ -36,20 +41,15 @@ namespace jwtLib.JWTAuth.Models
             if (user == null)
                 return null;
 
-            string newToken = _tokenHandler.GenerateRefreshToken();
-            string newTokenHash = _hasher.GetHashRefreshToken(newToken);
-            await _JWTUserManager.SetRefreshTokenAsync(user, newTokenHash);
-
-            return new AllTokens()
-            {
-                Token = _tokenHandler.GenerateMainToken(
-                    await _JWTUserManager.GetIdentityAsync(user, _settings.TokenName)),
-                RefreshToken = newToken
-            };
+            return await Refresh(user);
         }
 
-
-        public async Task<AllTokens> Refresh(IJWTUser user)
+        /// <summary>
+        /// refresh main token, before refresh check main token, it should be in "Good" or "ExpiredToken" status
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<AllTokens> Refresh([NotNull] IJWTUser user)
         {
             if (user == null)
                 return null;
@@ -67,7 +67,12 @@ namespace jwtLib.JWTAuth.Models
         }
 
 
-        public async Task<TokenData> GetCurrentIdFromToken([NotNull] string authorizationToken)
+        /// <summary>
+        /// encode token, get data from token and token status
+        /// </summary>
+        /// <param name="authorizationToken"></param>
+        /// <returns></returns>
+        public async Task<TokenData> GetCurrentDataFromToken([NotNull] string authorizationToken)
         {
             if (string.IsNullOrWhiteSpace(authorizationToken))
                 return null;
@@ -84,7 +89,7 @@ namespace jwtLib.JWTAuth.Models
                 res.Claims = claims.Claims.ToList();
                 return res;
             }
-            catch (SecurityTokenExpiredException) //просрочен
+            catch (SecurityTokenExpiredException) //expired
             {
                 res.Status = AuthorizeStatus.ExpiredToken;
                 var token = _tokenHandler.DecodeToken(authorizationToken);
@@ -92,11 +97,11 @@ namespace jwtLib.JWTAuth.Models
                 res.Claims = token.Claims.ToList();
                 return res;
             }
-            catch (SecurityTokenValidationException) //изменен извне(\поломан\недопустим)
+            catch (SecurityTokenValidationException) //changed\broken\bad
             {
                 res.Status = AuthorizeStatus.BadToken;
             }
-            catch (Exception) //все остальное
+            catch (Exception) //some error
             {
                 res.Status = AuthorizeStatus.ErrorWithDecode;
             }
@@ -105,6 +110,12 @@ namespace jwtLib.JWTAuth.Models
         }
 
 
+        /// <summary>
+        /// remove refresh token from user data
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="refreshToken"></param>
+        /// <returns></returns>
         public async Task DeleteRefreshTokenFromUser([NotNull] string userId, [NotNull] string refreshToken)
         {
             if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(refreshToken))
