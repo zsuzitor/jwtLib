@@ -26,7 +26,9 @@ namespace jwtLib.JWTAuth.Models
         }
 
         /// <summary>
-        /// refresh main token, before refresh check main token, it should be in "Good" or "ExpiredToken" status
+        /// refresh main token
+        /// please check old main token status, for that you can invoke "GetCurrentDataFromToken" method.
+        /// good status only: "Good" or "ExpiredToken"
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="refreshToken"></param>
@@ -44,8 +46,13 @@ namespace jwtLib.JWTAuth.Models
             return await Refresh(user);
         }
 
+
         /// <summary>
-        /// refresh main token, before refresh check main token, it should be in "Good" or "ExpiredToken" status
+        /// refresh(or create) tokens,
+        /// validate user email-password or email-refreshToken before invoke this method
+        /// if you have old tokens,
+        /// please check old main token status, for that you can invoke "GetCurrentDataFromToken" method.
+        /// good status only: "Good" or "ExpiredToken"
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
@@ -66,9 +73,9 @@ namespace jwtLib.JWTAuth.Models
             };
         }
 
-
         /// <summary>
         /// encode token, get data from token and token status
+        /// return token data only for AuthorizeStatus.Good and AuthorizeStatus.ExpiredToken status
         /// </summary>
         /// <param name="authorizationToken"></param>
         /// <returns></returns>
