@@ -1,7 +1,8 @@
 ﻿using jwtLib.JWTAuth.Interfaces;
 
-namespace jwtLib.Example
+namespace jwtLibUsage.Example
 {
+    //
     public class User : IJWTUser
     {
         public string Id { get; set; }

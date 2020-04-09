@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace jwtLib.Example
+namespace jwtLibUsage.Example
 {
     public class DataBase
     {

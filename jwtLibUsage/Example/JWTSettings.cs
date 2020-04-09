@@ -1,6 +1,6 @@
 ﻿using jwtLib.JWTAuth.Interfaces;
 
-namespace jwtLib.Example
+namespace jwtLibUsage.Example
 {
     public class JWTSettings : IJWTSettings
     {

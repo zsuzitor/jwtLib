@@ -4,7 +4,7 @@ using jwtLib.JWTAuth.Interfaces;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace jwtLib.Example
+namespace jwtLibUsage.Example
 {
 
     public class JWTUserManager : IJWTUserManager
@@ -55,11 +55,6 @@ namespace jwtLib.Example
             return claims.FirstOrDefault(x1 => x1.Type == ClaimsIdentity.DefaultNameClaimType)?.Value;
         }
 
-        public async Task<IJWTUser> GetUserAsync(string username, string password)
-        {
-            string passwordHash = password.GetHashCode().ToString();
-            return _db.Users.FirstOrDefault(x1 => x1.UserName == username && x1.HashPassword == passwordHash);
-        }
 
         public async Task<string> GetUserIdAsync(IJWTUser jwtUser)
         {

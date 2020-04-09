@@ -8,7 +8,7 @@ namespace jwtLib.JWTAuth.Interfaces
     public interface IJWTUserManager
     {
         Task<string> GetUserIdAsync(IJWTUser jwtUser);
-        Task<IJWTUser> GetUserAsync(string username, string password);
+        //Task<IJWTUser> GetUserAsync(string username, string password);
 
         Task<IJWTUser> GetWithRefreshTokenAsync(string userId, string refreshTokenHash);
 
