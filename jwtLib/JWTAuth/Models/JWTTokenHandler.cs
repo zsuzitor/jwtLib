@@ -25,7 +25,7 @@ namespace jwtLib.JWTAuth.Models
         public string GenerateMainToken(ClaimsIdentity identity)
         {
             var now = DateTime.UtcNow;
-            // создаем JWT-токен
+            // create JWT-token
             var jwt = new JwtSecurityToken(
                 issuer: _settings.Issuer,
                 audience: _settings.Audience,

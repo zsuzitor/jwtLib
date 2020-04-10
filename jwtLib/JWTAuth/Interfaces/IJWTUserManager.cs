@@ -21,7 +21,7 @@ namespace jwtLib.JWTAuth.Interfaces
         /// <param name="usjwtUserer"></param>
         /// <param name="authenticationType">use for create ClaimsIdentity. google->"claimsidentity authenticationtype"</param>
         /// <returns></returns>
-        Task<ClaimsIdentity> GetIdentityAsync(IJWTUser usjwtUserer, string authenticationType);
+        Task<ClaimsIdentity> GetIdentityAsync(IJWTUser jwtUser, string authenticationType);
 
         Task<string> GetIdFromClaimsAsync(ClaimsPrincipal claims);
         Task<string> GetIdFromClaimsAsync(IEnumerable<Claim> claims);

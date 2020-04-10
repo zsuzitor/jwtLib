@@ -10,5 +10,6 @@ namespace jwtLib.JWTAuth.Interfaces
         Task<AllTokens> Refresh(IJWTUser user);
         Task<TokenData> GetCurrentDataFromToken(string authorizationToken);
         Task DeleteRefreshTokenFromUser(string userId, string refreshToken);
+        string GenerateRefreshToken();
     }
 }
