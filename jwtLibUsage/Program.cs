@@ -40,8 +40,9 @@ namespace jwtLibUsage
             };
 
 
-            var _JWTService = new JWTService(new JWTUserManager(db), new JWTSettings(),
-                new JWTHasher(), new JWTTokenHandler(new JWTSettings()));
+            var _JWTService = new JWTService(new JWTUserManager(db, new JWTHasher()), new JWTSettings(),
+                //new JWTHasher(),
+                new JWTTokenHandler(new JWTSettings()));
 
             var user1 = db.Users.FirstOrDefault(x1 => x1.Id == "1");
 

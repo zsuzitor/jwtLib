@@ -12,16 +12,18 @@ namespace jwtLib.JWTAuth.Models
     public class JWTService : IJWTService
     {
         private IJWTUserManager _JWTUserManager;
+
         private IJWTSettings _settings;
-        private IJWTHasher _hasher;
+
+        //private IJWTHasher _hasher;
         private ITokenHandler _tokenHandler;
 
-        public JWTService(IJWTUserManager JWTUserManager, IJWTSettings settings, IJWTHasher hasher,
+        public JWTService(IJWTUserManager JWTUserManager, IJWTSettings settings, //IJWTHasher hasher,
             ITokenHandler tokenHandler)
         {
             _JWTUserManager = JWTUserManager;
             _settings = settings;
-            _hasher = hasher;
+            //_hasher = hasher;
             _tokenHandler = tokenHandler;
         }
 
@@ -38,8 +40,8 @@ namespace jwtLib.JWTAuth.Models
             if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(refreshToken))
                 return null;
 
-            string hashOldToken = _hasher.GetHashRefreshToken(refreshToken);
-            var user = await _JWTUserManager.GetWithRefreshTokenAsync(userId, hashOldToken);
+            //string hashOldToken = _hasher.GetHashRefreshToken(refreshToken);
+            var user = await _JWTUserManager.GetWithRefreshTokenAsync(userId, refreshToken);
             if (user == null)
                 return null;
 
@@ -62,8 +64,8 @@ namespace jwtLib.JWTAuth.Models
                 return null;
 
             string refToken = _tokenHandler.GenerateRefreshToken();
-            string refTokenHash = _hasher.GetHashRefreshToken(refToken);
-            await _JWTUserManager.SetRefreshTokenAsync(user, refTokenHash);
+            //string refTokenHash = _hasher.GetHashRefreshToken(refToken);
+            await _JWTUserManager.SetRefreshTokenAsync(user, refToken);
 
             var identity = await _JWTUserManager.GetIdentityAsync(user, _settings.TokenName);
             if (identity == null)
@@ -140,8 +142,8 @@ namespace jwtLib.JWTAuth.Models
             if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(refreshToken))
                 return;
 
-            string refreshTokenHash = _hasher.GetHashRefreshToken(refreshToken);
-            await _JWTUserManager.DeleteRefreshTokenFromUserAsync(userId, refreshTokenHash);
+            //string refreshTokenHash = _hasher.GetHashRefreshToken(refreshToken);
+            await _JWTUserManager.DeleteRefreshTokenFromUserAsync(userId, refreshToken);
         }
 
         public string GenerateRefreshToken()
