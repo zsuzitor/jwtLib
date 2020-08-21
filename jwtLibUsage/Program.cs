@@ -10,6 +10,7 @@ namespace jwtLibUsage
     {
         static void Main(string[] args)
         {
+            //TODO при рефреше надо проверить токен
             string pshash = "111u".GetHashCode().ToString();
 
             var db = new DataBase()

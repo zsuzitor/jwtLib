@@ -6,9 +6,10 @@ namespace jwtLib.JWTAuth.Interfaces
 {
     public interface ITokenHandler
     {
-        string GenerateMainToken(ClaimsIdentity identity);
-        string GenerateRefreshToken();
-        ClaimsPrincipal GetClaimsFromToken(string authorizationToken, out SecurityToken tokenSecure);
+        string GenerateToken(ClaimsIdentity identity, int lifeTimeInMinute, string key);
+        //string GenerateRefreshToken(string userId);
+        ClaimsPrincipal GetClaimsFromToken(string authorizationToken, string key, out SecurityToken tokenSecure);
+
         JwtSecurityToken DecodeToken(string token);
     }
 }

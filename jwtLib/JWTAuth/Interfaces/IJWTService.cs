@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using jwtLib.JWTAuth.Models.Poco;
 
@@ -10,6 +11,8 @@ namespace jwtLib.JWTAuth.Interfaces
         Task<AllTokens> Refresh(IJWTUser user);
         Task<TokenData> GetCurrentDataFromToken(string authorizationToken);
         Task DeleteRefreshTokenFromUser(string userId, string refreshToken);
-        string GenerateRefreshToken();
+        string GenerateRefreshToken(string userId);
+        ClaimsPrincipal GetClaimsFromAccessToken(string authorizationToken);
+        ClaimsPrincipal GetClaimsFromRefreshToken(string authorizationToken);
     }
 }

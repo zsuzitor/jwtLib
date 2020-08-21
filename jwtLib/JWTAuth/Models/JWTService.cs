@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using jwtLib.JWTAuth.Enums;
 using jwtLib.JWTAuth.Interfaces;
@@ -13,12 +14,15 @@ namespace jwtLib.JWTAuth.Models
     {
         private IJWTUserManager _JWTUserManager;
 
-        private IJWTSettings _settings;
+        private IJWTServiceSettings _settings;
 
         //private IJWTHasher _hasher;
         private ITokenHandler _tokenHandler;
 
-        public JWTService(IJWTUserManager JWTUserManager, IJWTSettings settings, //IJWTHasher hasher,
+        //private 
+
+
+        public JWTService(IJWTUserManager JWTUserManager, IJWTServiceSettings settings, //IJWTHasher hasher,
             ITokenHandler tokenHandler)
         {
             _JWTUserManager = JWTUserManager;
@@ -28,8 +32,8 @@ namespace jwtLib.JWTAuth.Models
         }
 
         /// <summary>
-        /// refresh main token
-        /// please check old main token status, for that you can invoke "GetCurrentDataFromToken" method.
+        /// validate refresh token and create\set new tokens
+        /// please check old access token status, for that you can invoke "GetCurrentDataFromToken" method.
         /// good status only: "Good" or "ExpiredToken"
         /// </summary>
         /// <param name="userId"></param>
@@ -39,6 +43,19 @@ namespace jwtLib.JWTAuth.Models
         {
             if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(refreshToken))
                 return null;
+            
+            var decoded = await this.GetCurrentDataFromToken(refreshToken);
+            if (decoded?.Status != AuthorizeStatus.Good)
+            {
+                return null;
+            }
+
+            var successCompare=await _JWTUserManager.ItIsUserClaims(decoded.Claims,userId);
+
+            if (!successCompare)
+            {
+                return null;
+            }
 
             //string hashOldToken = _hasher.GetHashRefreshToken(refreshToken);
             var user = await _JWTUserManager.GetWithRefreshTokenAsync(userId, refreshToken);
@@ -50,11 +67,12 @@ namespace jwtLib.JWTAuth.Models
 
 
         /// <summary>
-        /// refresh(or create) tokens,
+        /// create and set refresh token without valication and get new tokens,
         /// validate user email-password or email-refreshToken before invoke this method
         /// if you have old tokens,
-        /// please check old main token status, for that you can invoke "GetCurrentDataFromToken" method.
+        /// please check old access token status, for that you can invoke "GetCurrentDataFromToken" method.
         /// good status only: "Good" or "ExpiredToken"
+        /// your can invoke other overload "Refresh" method for validation
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
@@ -63,17 +81,20 @@ namespace jwtLib.JWTAuth.Models
             if (user == null)
                 return null;
 
-            string refToken = _tokenHandler.GenerateRefreshToken();
-            //string refTokenHash = _hasher.GetHashRefreshToken(refToken);
-            await _JWTUserManager.SetRefreshTokenAsync(user, refToken);
-
-            var identity = await _JWTUserManager.GetIdentityAsync(user, _settings.TokenName);
+            var identity = await _JWTUserManager.GetIdentityAsync(user, _settings.AuthenticationType);
             if (identity == null)
                 return null;
 
+            string refToken = GenerateRefreshToken(identity);
+            //string refTokenHash = _hasher.GetHashRefreshToken(refToken);
+            await _JWTUserManager.SetRefreshTokenAsync(user, refToken);
+
+            string accessToken = _tokenHandler.GenerateToken(
+                identity,_settings.LifetimeAccessToken, _settings.KeyForAccessToken);
+
             return new AllTokens()
             {
-                Token = _tokenHandler.GenerateMainToken(identity),
+                Token = accessToken,
                 RefreshToken = refToken
             };
         }
@@ -91,15 +112,15 @@ namespace jwtLib.JWTAuth.Models
 
             TokenData res = new TokenData
             {
-                Status = AuthorizeStatus.Good
+                Status = AuthorizeStatus.ErrorWithDecode
             };
 
             try
             {
-                var claims = _tokenHandler.GetClaimsFromToken(authorizationToken, out SecurityToken token);
+                var claims = _tokenHandler.GetClaimsFromToken123(authorizationToken, out SecurityToken token);
 
                 if (claims == null)
-                    throw new Exception($"error when {nameof(_tokenHandler.GetClaimsFromToken)} return null");
+                    throw new Exception($"error when {nameof(_tokenHandler.GetClaimsFromToken123)} return null");
 
                 res.UserId = await _JWTUserManager.GetIdFromClaimsAsync(claims);
 
@@ -107,6 +128,7 @@ namespace jwtLib.JWTAuth.Models
                     throw new Exception($"error when {nameof(_JWTUserManager.GetIdFromClaimsAsync)} return null");
 
                 res.Claims = claims.Claims?.ToList();
+                res.Status = AuthorizeStatus.Good;
                 return res;
             }
             catch (SecurityTokenExpiredException) //expired
@@ -120,11 +142,13 @@ namespace jwtLib.JWTAuth.Models
             catch (SecurityTokenValidationException) //changed\broken\bad
             {
                 res.Status = AuthorizeStatus.BadToken;
+                return res;
             }
             catch (Exception e) //some error
             {
                 res.Status = AuthorizeStatus.ErrorWithDecode;
                 res.ErrorsList.Add(e.ToString());
+                return res;
             }
 
             return null;
@@ -146,9 +170,30 @@ namespace jwtLib.JWTAuth.Models
             await _JWTUserManager.DeleteRefreshTokenFromUserAsync(userId, refreshToken);
         }
 
-        public string GenerateRefreshToken()
+        public async Task<string> GenerateRefreshToken(IJWTUser user)
         {
-            return _tokenHandler.GenerateRefreshToken();
+            var identity = await _JWTUserManager.GetIdentityAsync(user, _settings.AuthenticationType);
+            if (identity == null)
+                return null;
+
+            return GenerateRefreshToken(identity);
+        }
+
+        public string GenerateRefreshToken(ClaimsIdentity identity)
+        {
+            return _tokenHandler.GenerateToken(
+                identity, _settings.LifetimeRefreshToken, _settings.KeyForRefreshToken);
+        }
+
+
+        public ClaimsPrincipal GetClaimsFromAccessToken(string authorizationToken)
+        {
+            return _tokenHandler.GetClaimsFromToken(authorizationToken, _settings.KeyForAccessToken, out _);
+        }
+
+        public ClaimsPrincipal GetClaimsFromRefreshToken(string authorizationToken)
+        {
+            return _tokenHandler.GetClaimsFromToken(authorizationToken, _settings.KeyForRefreshToken, out _);
         }
 
     }

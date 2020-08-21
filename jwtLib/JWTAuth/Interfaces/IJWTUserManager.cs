@@ -10,7 +10,9 @@ namespace jwtLib.JWTAuth.Interfaces
         Task<string> GetUserIdAsync(IJWTUser jwtUser);
         //Task<IJWTUser> GetUserAsync(string username, string password);
 
-        
+        Task<bool> ItIsUserClaims(List<Claim> claims,IJWTUser jwtUser);
+        Task<bool> ItIsUserClaims(List<Claim> claims, string userId);
+
         Task<IJWTUser> GetWithRefreshTokenAsync(string userId, string refreshTokenHash);
 
         Task SetRefreshTokenAsync(IJWTUser jwtUser, string refreshToken);
@@ -25,6 +27,8 @@ namespace jwtLib.JWTAuth.Interfaces
         /// <param name="authenticationType">use for create ClaimsIdentity. google->"claimsidentity authenticationtype"</param>
         /// <returns></returns>
         Task<ClaimsIdentity> GetIdentityAsync(IJWTUser jwtUser, string authenticationType);
+
+        Task<List<Claim>> GetIdentityForRefreshAsync(IJWTUser jwtUser);
 
         Task<string> GetIdFromClaimsAsync(ClaimsPrincipal claims);
         Task<string> GetIdFromClaimsAsync(IEnumerable<Claim> claims);

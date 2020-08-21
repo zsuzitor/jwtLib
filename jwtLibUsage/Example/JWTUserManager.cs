@@ -12,6 +12,9 @@ namespace jwtLibUsage.Example
         private DataBase _db;
         private IJWTHasher _hasher;
 
+
+        private string _userIdClaimName = "user_id";
+
         public JWTUserManager(DataBase db, IJWTHasher hasher)
         {
             _db = db;
@@ -52,6 +55,35 @@ namespace jwtLibUsage.Example
             return claimsIdentity;
         }
 
+        public async Task<List<Claim>> GetIdentityForRefreshAsync(IJWTUser jwtUser)
+        {
+            return new List<Claim>()
+            {
+                new Claim(this._userIdClaimName, await this.GetUserIdAsync(jwtUser))
+            };
+        }
+
+        public async Task<bool> ItIsUserClaims(List<Claim> claims, IJWTUser jwtUser)
+        {
+            var userId = await GetUserIdAsync(jwtUser);
+
+            return await ItIsUserClaims(claims,userId);
+        }
+
+        public async Task<bool> ItIsUserClaims(List<Claim> claims, string userId)
+        {
+            var claimId = claims.FirstOrDefault(x => x.Type == _userIdClaimName);
+            if (claimId == null)
+            {
+                return false;
+            }
+
+            if (userId != claimId.Value)
+            {
+                return false;
+            }
+            return true;
+        }
 
         public async Task<string> GetIdFromClaimsAsync(ClaimsPrincipal claims)
         {
@@ -60,7 +92,8 @@ namespace jwtLibUsage.Example
 
         public async Task<string> GetIdFromClaimsAsync(IEnumerable<Claim> claims)
         {
-            return claims.FirstOrDefault(x1 => x1.Type == ClaimsIdentity.DefaultNameClaimType)?.Value;
+            //ClaimsIdentity.DefaultNameClaimType
+            return claims.FirstOrDefault(x1 => x1.Type == this._userIdClaimName)?.Value;
         }
 
 

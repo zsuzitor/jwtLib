@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using jwtLib.JWTAuth.Interfaces;
 using System.Security.Claims;
 using System.Text;
@@ -17,12 +16,12 @@ namespace jwtLib.JWTAuth.Models
             _settings = settings;
         }
 
-        public SymmetricSecurityKey GetSymmetricSecurityKey()
+        public SymmetricSecurityKey GetSymmetricSecurityKey(string key)
         {
-            return new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_settings.Key));
+            return new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key));
         }
 
-        public string GenerateMainToken(ClaimsIdentity identity)
+        public string GenerateToken(ClaimsIdentity identity,int lifeTimeInMinute,string key)
         {
             var now = DateTime.UtcNow;
             // create JWT-token
@@ -31,32 +30,26 @@ namespace jwtLib.JWTAuth.Models
                 audience: _settings.Audience,
                 notBefore: now,
                 claims: identity?.Claims,
-                expires: now.Add(TimeSpan.FromMinutes(_settings.Lfetime)),
-                signingCredentials: new SigningCredentials(this.GetSymmetricSecurityKey(),
+                expires: now.Add(TimeSpan.FromMinutes(lifeTimeInMinute)),
+                signingCredentials: new SigningCredentials(this.GetSymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256));
             return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
 
-        public string GenerateRefreshToken()
-        {
-            Random random = new Random();
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, _settings.LengthRefreshToken)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
-        }
 
-        public ClaimsPrincipal GetClaimsFromToken(string authorizationToken, out SecurityToken tokenSecure)
+        public ClaimsPrincipal GetClaimsFromToken(string authorizationToken, string key, out SecurityToken tokenSecure)
         {
             //tokenSecure = null;
-            var key = Encoding.ASCII.GetBytes(_settings.Key);
+            var keyBytes = Encoding.ASCII.GetBytes(key);
             var handler = new JwtSecurityTokenHandler();
             var validations = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
+                IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
                 ValidateIssuer = false,
                 ValidateAudience = false
             };
+
             return handler.ValidateToken(authorizationToken, validations, out tokenSecure);
         }
 
