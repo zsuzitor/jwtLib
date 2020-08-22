@@ -10,20 +10,20 @@ namespace jwtLib.JWTAuth.Interfaces
         Task<string> GetUserIdAsync(IJWTUser jwtUser);
         //Task<IJWTUser> GetUserAsync(string username, string password);
 
-        Task<bool> ItIsUserClaims(List<Claim> claims,IJWTUser jwtUser);
+        Task<bool> ItIsUserClaims(List<Claim> claims, IJWTUser jwtUser);
         Task<bool> ItIsUserClaims(List<Claim> claims, string userId);
 
         Task<IJWTUser> GetWithRefreshTokenAsync(string userId, string refreshTokenHash);
 
         Task SetRefreshTokenAsync(IJWTUser jwtUser, string refreshToken);
-        
-        
+
+
         Task DeleteRefreshTokenFromUserAsync(string userId, string refreshToken);
 
         /// <summary>
         /// get data which will be saved in token
         /// </summary>
-        /// <param name="usjwtUserer"></param>
+        /// <param name="jwtUser"></param>
         /// <param name="authenticationType">use for create ClaimsIdentity. google->"claimsidentity authenticationtype"</param>
         /// <returns></returns>
         Task<ClaimsIdentity> GetIdentityAsync(IJWTUser jwtUser, string authenticationType);
@@ -34,9 +34,5 @@ namespace jwtLib.JWTAuth.Interfaces
         Task<string> GetIdFromClaimsAsync(IEnumerable<Claim> claims);
 
 
-        //Task<IJWTUser> GetByNameAsync(string name);
-        //Task<bool> CheckPasswordAsync(IJWTUser user, string password);
-        //Task SetRefreshTokenAsync(string userId, string refreshTokenHash);
-        //Task<ClaimsIdentity> GetIdentityAsync(string username, string password, string authenticationType);
     }
 }

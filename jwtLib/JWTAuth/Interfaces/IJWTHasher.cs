@@ -2,6 +2,6 @@
 {
     public interface IJWTHasher
     {
-        string GetHashRefreshToken(string token);
+        string GetHash(string token);
     }
 }

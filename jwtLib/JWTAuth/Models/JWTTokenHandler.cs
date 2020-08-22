@@ -9,19 +9,19 @@ namespace jwtLib.JWTAuth.Models
 {
     public class JWTTokenHandler : ITokenHandler
     {
-        private IJWTSettings _settings;
+        private readonly IJWTSettings _settings;
 
         public JWTTokenHandler(IJWTSettings settings)
         {
             _settings = settings;
         }
 
-        public SymmetricSecurityKey GetSymmetricSecurityKey(string key)
+        public virtual SymmetricSecurityKey GetSymmetricSecurityKey(string key)
         {
             return new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key));
         }
 
-        public string GenerateToken(ClaimsIdentity identity,int lifeTimeInMinute,string key)
+        public virtual string GenerateToken(ClaimsIdentity identity, int lifeTimeInMinute, string key)
         {
             var now = DateTime.UtcNow;
             // create JWT-token
@@ -37,7 +37,7 @@ namespace jwtLib.JWTAuth.Models
         }
 
 
-        public ClaimsPrincipal GetClaimsFromToken(string authorizationToken, string key, out SecurityToken tokenSecure)
+        public virtual ClaimsPrincipal GetClaimsFromToken(string authorizationToken, string key, out SecurityToken tokenSecure)
         {
             //tokenSecure = null;
             var keyBytes = Encoding.ASCII.GetBytes(key);
@@ -53,7 +53,7 @@ namespace jwtLib.JWTAuth.Models
             return handler.ValidateToken(authorizationToken, validations, out tokenSecure);
         }
 
-        public JwtSecurityToken DecodeToken(string token)
+        public virtual JwtSecurityToken DecodeToken(string token)
         {
             return new JwtSecurityTokenHandler().ReadJwtToken(token);
         }

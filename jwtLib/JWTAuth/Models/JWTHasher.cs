@@ -6,7 +6,7 @@ namespace jwtLib.JWTAuth.Models
 {
     public class JWTHasher : IJWTHasher
     {
-        public string GetHashRefreshToken(string token)
+        public string GetHash(string token)
         {
 
             // generate a 128-bit salt using a secure PRNG

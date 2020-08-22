@@ -32,7 +32,7 @@ namespace jwtLibUsage.Example
 
         public async Task DeleteRefreshTokenFromUserAsync(string userId, string refreshToken)
         {
-            var tokenHash = _hasher.GetHashRefreshToken(refreshToken);
+            var tokenHash = _hasher.GetHash(refreshToken);
             await DeleteRefreshTokenHashFromUserAsync(userId, tokenHash);
         }
 
@@ -44,8 +44,8 @@ namespace jwtLibUsage.Example
 
             var claims = new List<Claim>
             {
-                new Claim(type: ClaimsIdentity.DefaultNameClaimType,
-                    value: await this.GetUserIdAsync(user)),
+                new Claim(type: _userIdClaimName,
+                    value: await GetUserIdAsync(user)),
                 //new Claim(type:ClaimTypes.Name,value:user.UserName)//,
                 new Claim(type: ClaimsIdentity.DefaultRoleClaimType, value: "testRole")
             };
@@ -59,7 +59,7 @@ namespace jwtLibUsage.Example
         {
             return new List<Claim>()
             {
-                new Claim(this._userIdClaimName, await this.GetUserIdAsync(jwtUser))
+                new Claim(_userIdClaimName, await GetUserIdAsync(jwtUser))
             };
         }
 
@@ -67,7 +67,7 @@ namespace jwtLibUsage.Example
         {
             var userId = await GetUserIdAsync(jwtUser);
 
-            return await ItIsUserClaims(claims,userId);
+            return await ItIsUserClaims(claims, userId);
         }
 
         public async Task<bool> ItIsUserClaims(List<Claim> claims, string userId)
@@ -82,18 +82,21 @@ namespace jwtLibUsage.Example
             {
                 return false;
             }
+
             return true;
         }
 
         public async Task<string> GetIdFromClaimsAsync(ClaimsPrincipal claims)
         {
-            return claims?.Identity?.Name;
+            return await GetIdFromClaimsAsync(claims.Claims);
+            //var g_= claims?.Claims.ToList();
+            //return claims?.Identity?.Name;
         }
 
         public async Task<string> GetIdFromClaimsAsync(IEnumerable<Claim> claims)
         {
             //ClaimsIdentity.DefaultNameClaimType
-            return claims.FirstOrDefault(x1 => x1.Type == this._userIdClaimName)?.Value;
+            return claims.FirstOrDefault(x1 => x1.Type == _userIdClaimName)?.Value;
         }
 
 
@@ -105,7 +108,7 @@ namespace jwtLibUsage.Example
 
         public async Task<IJWTUser> GetWithRefreshTokenAsync(string userId, string refreshToken)
         {
-            var tokenHash = _hasher.GetHashRefreshToken(refreshToken);
+            var tokenHash = _hasher.GetHash(refreshToken);
             return await GetWithRefreshTokenHashAsync(userId, tokenHash);
         }
 
@@ -117,14 +120,22 @@ namespace jwtLibUsage.Example
 
         public async Task SetRefreshTokenAsync(IJWTUser jwtUser, string refreshToken)
         {
-            var tokenHash=_hasher.GetHashRefreshToken(refreshToken);
+            var tokenHash = _hasher.GetHash(refreshToken);
             await SetRefreshTokenHashAsync(jwtUser, tokenHash);
         }
 
         public async Task SetRefreshTokenHashAsync(IJWTUser jwtUser, string refreshTokenHash)
         {
             var user = jwtUser as User;
+            if (user != null)
+            {
+                return;
+            }
             var userFromDb = _db.Users.FirstOrDefault(x1 => x1.Id == user.Id);
+            if (userFromDb == null)
+            {
+                return;
+            }
             userFromDb.RefreshTokenHash = refreshTokenHash;
         }
     }

@@ -2,7 +2,7 @@
 {
     public interface IJWTServiceSettings
     {
-       
+
         int LifetimeAccessToken { get; } // life time access token in minutes
         int LifetimeRefreshToken { get; }// life time refresh token in minutes, longer than LifetimeAccessToken
 
