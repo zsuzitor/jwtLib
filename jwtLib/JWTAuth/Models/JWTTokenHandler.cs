@@ -39,7 +39,12 @@ namespace jwtLib.JWTAuth.Models
 
         public virtual ClaimsPrincipal GetClaimsFromToken(string authorizationToken, string key, out SecurityToken tokenSecure)
         {
-            //tokenSecure = null;
+            tokenSecure = null;
+            if (string.IsNullOrWhiteSpace(authorizationToken))
+            {
+                return null;
+            }
+
             var keyBytes = Encoding.ASCII.GetBytes(key);
             var handler = new JwtSecurityTokenHandler();
             var validations = new TokenValidationParameters

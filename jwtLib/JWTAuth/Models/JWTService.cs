@@ -30,7 +30,7 @@ namespace jwtLib.JWTAuth.Models
         {
             _JWTUserManager = JWTUserManager;
             _settings = settings;
-            //_hasher = hasher;
+
             _tokenHandler = tokenHandler;
         }
 
@@ -42,30 +42,18 @@ namespace jwtLib.JWTAuth.Models
         /// <param name="userId"></param>
         /// <param name="refreshToken"></param>
         /// <returns></returns>
-        public virtual async Task<AllTokens> Refresh([NotNull] string userId, [NotNull] string refreshToken)
+        public virtual async Task<AllTokens> RefreshAsync([NotNull] string userId, [NotNull] string refreshToken)
         {
-            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(refreshToken))
-                return null;
-
-            var decoded = await this.GetCurrentDataFromToken(refreshToken, _settings.KeyForRefreshToken);
-            if (decoded?.Status != AuthorizeStatus.Good)
+            if (!await ValidateRefreshTokenAsync(userId, refreshToken))
             {
                 return null;
             }
 
-            var successCompare = await _JWTUserManager.ItIsUserClaims(decoded.Claims, userId);
-
-            if (!successCompare)
-            {
-                return null;
-            }
-
-            //string hashOldToken = _hasher.GetHashRefreshToken(refreshToken);
             var user = await _JWTUserManager.GetWithRefreshTokenAsync(userId, refreshToken);
             if (user == null)
                 return null;
 
-            return await CreateAndSetNewTokens(user);
+            return await CreateAndSetNewTokensAsync(user);
         }
 
 
@@ -79,7 +67,7 @@ namespace jwtLib.JWTAuth.Models
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public virtual async Task<AllTokens> CreateAndSetNewTokens([NotNull] IJWTUser user)
+        public virtual async Task<AllTokens> CreateAndSetNewTokensAsync([NotNull] IJWTUser user)
         {
             if (user == null)
                 return null;
@@ -90,7 +78,10 @@ namespace jwtLib.JWTAuth.Models
 
             string refToken = GenerateRefreshToken(identity);
             //string refTokenHash = _hasher.GetHashRefreshToken(refToken);
-            await _JWTUserManager.SetRefreshTokenAsync(user, refToken);
+            if (!await _JWTUserManager.SetRefreshTokenAsync(user, refToken))
+            {
+                return null;
+            }
 
             string accessToken = _tokenHandler.GenerateToken(
                 identity, _settings.LifetimeAccessToken, _settings.KeyForAccessToken);
@@ -108,28 +99,28 @@ namespace jwtLib.JWTAuth.Models
         /// </summary>
         /// <param name="authorizationToken"></param>
         /// <returns></returns>
-        public virtual async Task<TokenData> GetCurrentDataFromToken([NotNull] string authorizationToken, string key)
+        public virtual async Task<TokenData> GetCurrentDataFromTokenAsync([NotNull] string authorizationToken, [NotNull] string key)
         {
-            if (string.IsNullOrWhiteSpace(authorizationToken))
+            if (string.IsNullOrWhiteSpace(authorizationToken) || string.IsNullOrWhiteSpace(key))
                 return null;
-
-            TokenData res = new TokenData
-            {
-                Status = AuthorizeStatus.ErrorWithDecode
-            };
 
             try
             {
+                TokenData res = new TokenData
+                {
+                    Status = AuthorizeStatus.ErrorWithDecode
+                };
+
                 var claimsObj = _tokenHandler.GetClaimsFromToken(authorizationToken, key, out _);
-                var claims = claimsObj.Claims?.ToList();
+                var claims = claimsObj?.Claims?.ToList();
 
 
-                if (claimsObj == null|| claims==null|| claims.Count==0)
+                if (claims == null || claims.Count == 0)
                     throw new Exception($"error when {nameof(_tokenHandler.GetClaimsFromToken)} return null");
 
                 res.UserId = await _JWTUserManager.GetIdFromClaimsAsync(claims);
 
-                if (res.UserId == null)
+                if (string.IsNullOrWhiteSpace(res.UserId))
                     throw new Exception($"error when {nameof(_JWTUserManager.GetIdFromClaimsAsync)} return null");
 
                 res.Claims = claims;
@@ -138,20 +129,33 @@ namespace jwtLib.JWTAuth.Models
             }
             catch (SecurityTokenExpiredException) //expired
             {
-                res.Status = AuthorizeStatus.ExpiredToken;
+                var res = new TokenData
+                {
+                    Status = AuthorizeStatus.ExpiredToken,
+                };
+
                 var token = _tokenHandler.DecodeToken(authorizationToken);
                 res.UserId = await _JWTUserManager.GetIdFromClaimsAsync(token.Claims);
                 res.Claims = token.Claims.ToList();
-                return res;
+
+
             }
             catch (SecurityTokenValidationException) //changed\broken\bad
             {
-                res.Status = AuthorizeStatus.BadToken;
+                var res = new TokenData
+                {
+                    Status = AuthorizeStatus.BadToken,
+                };
+
                 return res;
             }
             catch (Exception e) //some error
             {
-                res.Status = AuthorizeStatus.ErrorWithDecode;
+                var res = new TokenData
+                {
+                    Status = AuthorizeStatus.ErrorWithDecode,
+                };
+
                 res.ErrorsList.Add(e.ToString());
                 return res;
             }
@@ -166,16 +170,17 @@ namespace jwtLib.JWTAuth.Models
         /// <param name="userId"></param>
         /// <param name="refreshToken"></param>
         /// <returns></returns>
-        public virtual async Task DeleteRefreshTokenFromUser([NotNull] string userId, [NotNull] string refreshToken)
+        public virtual async Task<bool> DeleteRefreshTokenFromUserAsync([NotNull] string userId, [NotNull] string refreshToken)
         {
-            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(refreshToken))
-                return;
+            if (!await ValidateRefreshTokenAsync(userId, refreshToken))
+            {
+                return false;
+            }
 
-            //string refreshTokenHash = _hasher.GetHashRefreshToken(refreshToken);
-            await _JWTUserManager.DeleteRefreshTokenFromUserAsync(userId, refreshToken);
+            return await _JWTUserManager.DeleteRefreshTokenFromUserAsync(userId, refreshToken);
         }
 
-        public virtual async Task<string> GenerateRefreshToken(IJWTUser user)
+        public virtual async Task<string> GenerateRefreshTokenAsync(IJWTUser user)
         {
             var identity = await _JWTUserManager.GetIdentityAsync(user, _settings.AuthenticationType);
             if (identity == null)
@@ -199,6 +204,56 @@ namespace jwtLib.JWTAuth.Models
         public virtual ClaimsPrincipal GetClaimsFromRefreshToken(string authorizationToken, out SecurityToken tokenSecure)
         {
             return _tokenHandler.GetClaimsFromToken(authorizationToken, _settings.KeyForRefreshToken, out tokenSecure);
+        }
+
+        public virtual async Task<bool> ValidateRefreshTokenAsync([NotNull] string userId, [NotNull] string refreshToken)
+        {
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(refreshToken))
+                return false;
+
+            var decoded = await GetCurrentDataFromTokenAsync(refreshToken, _settings.KeyForRefreshToken);
+            if (decoded?.Status != AuthorizeStatus.Good)
+            {
+                return false;
+            }
+
+            var successCompare = await _JWTUserManager.ItIsUserClaimsAsync(decoded.Claims, userId);
+
+            if (!successCompare)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public virtual async Task<string> GetUserIdFromRefreshTokenAsync([NotNull] string refreshToken)
+        {
+            if (string.IsNullOrWhiteSpace(refreshToken))
+                return null;
+
+            var decoded = await GetCurrentDataFromTokenAsync(refreshToken, _settings.KeyForRefreshToken);
+            if (decoded?.Status != AuthorizeStatus.Good)
+            {
+                return null;
+            }
+
+            var userId = await _JWTUserManager.GetIdFromClaimsAsync(decoded.Claims);
+
+            return userId;
+        }
+
+        public virtual async Task<IJWTUser> GetUserByRefreshTokenAsync([NotNull] string userId, [NotNull] string refreshToken)
+        {
+            if (!await ValidateRefreshTokenAsync(userId, refreshToken))
+            {
+                return null;
+            }
+
+
+            //string hashOldToken = _hasher.GetHashRefreshToken(refreshToken);
+            return await _JWTUserManager.GetWithRefreshTokenAsync(userId, refreshToken);
+
         }
 
     }

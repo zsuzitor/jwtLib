@@ -3,17 +3,18 @@ using System.Linq;
 using jwtLib.JWTAuth.Interfaces;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace jwtLibUsage.Example
 {
 
     public class JWTUserManager : IJWTUserManager
     {
-        private DataBase _db;
-        private IJWTHasher _hasher;
+        private readonly DataBase _db;
+        private readonly IJWTHasher _hasher;
 
 
-        private string _userIdClaimName = "user_id";
+        private readonly string _userIdClaimName = "user_id";
 
         public JWTUserManager(DataBase db, IJWTHasher hasher)
         {
@@ -22,22 +23,23 @@ namespace jwtLibUsage.Example
         }
 
 
-        public async Task DeleteRefreshTokenHashFromUserAsync(string userId, string refreshTokenHash)
+        public async Task<bool> DeleteRefreshTokenHashFromUserAsync([NotNull] string userId, [NotNull] string refreshTokenHash)
         {
             var user = _db.Users.FirstOrDefault(x1 => x1.Id == userId && x1.RefreshTokenHash == refreshTokenHash);
             if (user == null)
-                return;
+                return false;
             user.RefreshTokenHash = null;
+            return true;
         }
 
-        public async Task DeleteRefreshTokenFromUserAsync(string userId, string refreshToken)
+        public async Task<bool> DeleteRefreshTokenFromUserAsync([NotNull] string userId, [NotNull] string refreshToken)
         {
             var tokenHash = _hasher.GetHash(refreshToken);
-            await DeleteRefreshTokenHashFromUserAsync(userId, tokenHash);
+            return await DeleteRefreshTokenHashFromUserAsync(userId, tokenHash);
         }
 
 
-        public async Task<ClaimsIdentity> GetIdentityAsync(IJWTUser user, string authenticationType)
+        public async Task<ClaimsIdentity> GetIdentityAsync([NotNull] IJWTUser user, [NotNull] string authenticationType)
         {
             if (user == null)
                 return null;
@@ -55,7 +57,7 @@ namespace jwtLibUsage.Example
             return claimsIdentity;
         }
 
-        public async Task<List<Claim>> GetIdentityForRefreshAsync(IJWTUser jwtUser)
+        public async Task<List<Claim>> GetIdentityForRefreshAsync([NotNull] IJWTUser jwtUser)
         {
             return new List<Claim>()
             {
@@ -63,14 +65,14 @@ namespace jwtLibUsage.Example
             };
         }
 
-        public async Task<bool> ItIsUserClaims(List<Claim> claims, IJWTUser jwtUser)
+        public async Task<bool> ItIsUserClaimsAsync([NotNull] IEnumerable<Claim> claims, [NotNull] IJWTUser jwtUser)
         {
             var userId = await GetUserIdAsync(jwtUser);
 
-            return await ItIsUserClaims(claims, userId);
+            return await ItIsUserClaimsAsync(claims, userId);
         }
 
-        public async Task<bool> ItIsUserClaims(List<Claim> claims, string userId)
+        public async Task<bool> ItIsUserClaimsAsync([NotNull] IEnumerable<Claim> claims, [NotNull] string userId)
         {
             var claimId = claims.FirstOrDefault(x => x.Type == _userIdClaimName);
             if (claimId == null)
@@ -86,57 +88,60 @@ namespace jwtLibUsage.Example
             return true;
         }
 
-        public async Task<string> GetIdFromClaimsAsync(ClaimsPrincipal claims)
+        public async Task<string> GetIdFromClaimsAsync([NotNull] ClaimsPrincipal claims)
         {
             return await GetIdFromClaimsAsync(claims.Claims);
-            //var g_= claims?.Claims.ToList();
-            //return claims?.Identity?.Name;
+
         }
 
-        public async Task<string> GetIdFromClaimsAsync(IEnumerable<Claim> claims)
+        public async Task<string> GetIdFromClaimsAsync([NotNull] IEnumerable<Claim> claims)
         {
             //ClaimsIdentity.DefaultNameClaimType
             return claims.FirstOrDefault(x1 => x1.Type == _userIdClaimName)?.Value;
         }
 
 
-        public async Task<string> GetUserIdAsync(IJWTUser jwtUser)
+        public async Task<string> GetUserIdAsync([NotNull] IJWTUser jwtUser)
         {
             var user = jwtUser as User;
             return user?.Id;
         }
 
-        public async Task<IJWTUser> GetWithRefreshTokenAsync(string userId, string refreshToken)
+        public async Task<IJWTUser> GetWithRefreshTokenAsync([NotNull] string userId, [NotNull] string refreshToken)
         {
             var tokenHash = _hasher.GetHash(refreshToken);
             return await GetWithRefreshTokenHashAsync(userId, tokenHash);
         }
 
-        public async Task<IJWTUser> GetWithRefreshTokenHashAsync(string userId, string refreshTokenHash)
+        public async Task<IJWTUser> GetWithRefreshTokenHashAsync([NotNull] string userId, [NotNull] string refreshTokenHash)
         {
             return _db.Users.FirstOrDefault(x1 => x1.Id == userId && x1.RefreshTokenHash == refreshTokenHash);
         }
 
 
-        public async Task SetRefreshTokenAsync(IJWTUser jwtUser, string refreshToken)
+        public async Task<bool> SetRefreshTokenAsync([NotNull] IJWTUser jwtUser, [NotNull] string refreshToken)
         {
             var tokenHash = _hasher.GetHash(refreshToken);
-            await SetRefreshTokenHashAsync(jwtUser, tokenHash);
+            return await SetRefreshTokenHashAsync(jwtUser, tokenHash);
         }
 
-        public async Task SetRefreshTokenHashAsync(IJWTUser jwtUser, string refreshTokenHash)
+        public async Task<bool> SetRefreshTokenHashAsync([NotNull] IJWTUser jwtUser, [NotNull] string refreshTokenHash)
         {
             var user = jwtUser as User;
-            if (user != null)
+            if (user == null)
             {
-                return;
+                return false;
             }
+
             var userFromDb = _db.Users.FirstOrDefault(x1 => x1.Id == user.Id);
             if (userFromDb == null)
             {
-                return;
+                return false;
             }
+
             userFromDb.RefreshTokenHash = refreshTokenHash;
+
+            return true;
         }
     }
 }

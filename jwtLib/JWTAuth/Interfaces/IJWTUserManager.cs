@@ -10,15 +10,15 @@ namespace jwtLib.JWTAuth.Interfaces
         Task<string> GetUserIdAsync(IJWTUser jwtUser);
         //Task<IJWTUser> GetUserAsync(string username, string password);
 
-        Task<bool> ItIsUserClaims(List<Claim> claims, IJWTUser jwtUser);
-        Task<bool> ItIsUserClaims(List<Claim> claims, string userId);
+        Task<bool> ItIsUserClaimsAsync(IEnumerable<Claim> claims, IJWTUser jwtUser);
+        Task<bool> ItIsUserClaimsAsync(IEnumerable<Claim> claims, string userId);
 
         Task<IJWTUser> GetWithRefreshTokenAsync(string userId, string refreshTokenHash);
 
-        Task SetRefreshTokenAsync(IJWTUser jwtUser, string refreshToken);
+        Task<bool> SetRefreshTokenAsync(IJWTUser jwtUser, string refreshToken);
 
 
-        Task DeleteRefreshTokenFromUserAsync(string userId, string refreshToken);
+        Task<bool> DeleteRefreshTokenFromUserAsync(string userId, string refreshToken);
 
         /// <summary>
         /// get data which will be saved in token

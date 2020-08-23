@@ -53,15 +53,15 @@ namespace jwtLibUsage
             // do not search user only with refreshtoken or id.
             //please check oldMainToken, it should be in "Good" or "ExpiredToken" AuthorizeStatus
             //for that you can use "GetCurrentDataFromToken"
-            var tokens = _JWTService.CreateAndSetNewTokens(user1).Result;
-            var tokenData = _JWTService.GetCurrentDataFromToken(tokens.AccessToken, jwtServiceSettings.KeyForAccessToken).Result;
+            var tokens = _JWTService.CreateAndSetNewTokensAsync(user1).Result;
+            var tokenData = _JWTService.GetCurrentDataFromTokenAsync(tokens.AccessToken, jwtServiceSettings.KeyForAccessToken).Result;
             if( tokenData?.Status!=jwtLib.JWTAuth.Enums.AuthorizeStatus.Good)
             {
                 //error
             }
 
-            var newTokens = _JWTService.Refresh(user1.Id, tokens.RefreshToken).Result;
-            _JWTService.DeleteRefreshTokenFromUser("1", newTokens.RefreshToken).Wait();
+            var newTokens = _JWTService.RefreshAsync(user1.Id, tokens.RefreshToken).Result;
+            _JWTService.DeleteRefreshTokenFromUserAsync("1", newTokens.RefreshToken).Wait();
 
             Console.WriteLine("Hello World!");
         }
