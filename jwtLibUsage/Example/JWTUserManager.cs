@@ -39,7 +39,7 @@ namespace jwtLibUsage.Example
         }
 
 
-        public async Task<ClaimsIdentity> GetIdentityAsync([NotNull] IJWTUser user, [NotNull] string authenticationType)
+        public ClaimsIdentity GetIdentity([NotNull] IJWTUser user, [NotNull] string authenticationType)
         {
             if (user == null)
                 return null;
@@ -47,7 +47,7 @@ namespace jwtLibUsage.Example
             var claims = new List<Claim>
             {
                 new Claim(type: _userIdClaimName,
-                    value: await GetUserIdAsync(user)),
+                    value: GetUserId(user)),
                 //new Claim(type:ClaimTypes.Name,value:user.UserName)//,
                 new Claim(type: ClaimsIdentity.DefaultRoleClaimType, value: "testRole")
             };
@@ -57,22 +57,22 @@ namespace jwtLibUsage.Example
             return claimsIdentity;
         }
 
-        public async Task<List<Claim>> GetIdentityForRefreshAsync([NotNull] IJWTUser jwtUser)
+        public List<Claim> GetIdentityForRefresh([NotNull] IJWTUser jwtUser)
         {
             return new List<Claim>()
             {
-                new Claim(_userIdClaimName, await GetUserIdAsync(jwtUser))
+                new Claim(_userIdClaimName, GetUserId(jwtUser))
             };
         }
 
-        public async Task<bool> ItIsUserClaimsAsync([NotNull] IEnumerable<Claim> claims, [NotNull] IJWTUser jwtUser)
+        public bool ItIsUserClaims([NotNull] IEnumerable<Claim> claims, [NotNull] IJWTUser jwtUser)
         {
-            var userId = await GetUserIdAsync(jwtUser);
+            var userId = GetUserId(jwtUser);
 
-            return await ItIsUserClaimsAsync(claims, userId);
+            return ItIsUserClaims(claims, userId);
         }
 
-        public async Task<bool> ItIsUserClaimsAsync([NotNull] IEnumerable<Claim> claims, [NotNull] string userId)
+        public bool ItIsUserClaims([NotNull] IEnumerable<Claim> claims, [NotNull] string userId)
         {
             var claimId = claims.FirstOrDefault(x => x.Type == _userIdClaimName);
             if (claimId == null)
@@ -88,20 +88,20 @@ namespace jwtLibUsage.Example
             return true;
         }
 
-        public async Task<string> GetIdFromClaimsAsync([NotNull] ClaimsPrincipal claims)
+        public string GetIdFromClaims([NotNull] ClaimsPrincipal claims)
         {
-            return await GetIdFromClaimsAsync(claims.Claims);
+            return GetIdFromClaims(claims.Claims);
 
         }
 
-        public async Task<string> GetIdFromClaimsAsync([NotNull] IEnumerable<Claim> claims)
+        public string GetIdFromClaims([NotNull] IEnumerable<Claim> claims)
         {
             //ClaimsIdentity.DefaultNameClaimType
             return claims.FirstOrDefault(x1 => x1.Type == _userIdClaimName)?.Value;
         }
 
 
-        public async Task<string> GetUserIdAsync([NotNull] IJWTUser jwtUser)
+        public string GetUserId([NotNull] IJWTUser jwtUser)
         {
             var user = jwtUser as User;
             return user?.Id;

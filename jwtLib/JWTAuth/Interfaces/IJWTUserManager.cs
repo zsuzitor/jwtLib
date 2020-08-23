@@ -7,11 +7,11 @@ namespace jwtLib.JWTAuth.Interfaces
 {
     public interface IJWTUserManager
     {
-        Task<string> GetUserIdAsync(IJWTUser jwtUser);
+        string GetUserId(IJWTUser jwtUser);
         //Task<IJWTUser> GetUserAsync(string username, string password);
 
-        Task<bool> ItIsUserClaimsAsync(IEnumerable<Claim> claims, IJWTUser jwtUser);
-        Task<bool> ItIsUserClaimsAsync(IEnumerable<Claim> claims, string userId);
+        bool ItIsUserClaims(IEnumerable<Claim> claims, IJWTUser jwtUser);
+        bool ItIsUserClaims(IEnumerable<Claim> claims, string userId);
 
         Task<IJWTUser> GetWithRefreshTokenAsync(string userId, string refreshTokenHash);
 
@@ -26,12 +26,12 @@ namespace jwtLib.JWTAuth.Interfaces
         /// <param name="jwtUser"></param>
         /// <param name="authenticationType">use for create ClaimsIdentity. google->"claimsidentity authenticationtype"</param>
         /// <returns></returns>
-        Task<ClaimsIdentity> GetIdentityAsync(IJWTUser jwtUser, string authenticationType);
+        ClaimsIdentity GetIdentity(IJWTUser jwtUser, string authenticationType);
 
-        Task<List<Claim>> GetIdentityForRefreshAsync(IJWTUser jwtUser);
+        List<Claim> GetIdentityForRefresh(IJWTUser jwtUser);
 
-        Task<string> GetIdFromClaimsAsync(ClaimsPrincipal claims);
-        Task<string> GetIdFromClaimsAsync(IEnumerable<Claim> claims);
+        string GetIdFromClaims(ClaimsPrincipal claims);
+        string GetIdFromClaims(IEnumerable<Claim> claims);
 
 
     }

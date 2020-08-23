@@ -42,6 +42,7 @@ namespace jwtLibUsage
 
             var jwtServiceSettings = new JWTServiceSettings();
 
+
             var _JWTService = new JWTService(new JWTUserManager(db, new JWTHasher()), jwtServiceSettings,
                 //new JWTHasher(),
                 new JWTTokenHandler(new JWTSettings()));
@@ -54,7 +55,10 @@ namespace jwtLibUsage
             //please check oldMainToken, it should be in "Good" or "ExpiredToken" AuthorizeStatus
             //for that you can use "GetCurrentDataFromToken"
             var tokens = _JWTService.CreateAndSetNewTokensAsync(user1).Result;
-            var tokenData = _JWTService.GetCurrentDataFromTokenAsync(tokens.AccessToken, jwtServiceSettings.KeyForAccessToken).Result;
+            var userId = _JWTService.GetUserIdFromAccessToken(tokens.AccessToken);
+            //_JWTService.GetUserIdFromRefreshTokenAsync
+
+            var tokenData = _JWTService.GetCurrentDataFromToken(tokens.AccessToken, jwtServiceSettings.KeyForAccessToken);
             if( tokenData?.Status!=jwtLib.JWTAuth.Enums.AuthorizeStatus.Good)
             {
                 //error
