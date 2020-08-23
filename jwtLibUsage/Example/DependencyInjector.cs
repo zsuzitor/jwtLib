@@ -10,6 +10,7 @@ namespace jwtLibUsage.Example
         //    services.AddSingleton<IJWTHasher, JWTHasher>();
         //    services.AddScoped<IJWTService, JWTService>();
         //    services.AddSingleton<IJWTSettings, JWTSettings>();
+        //    services.AddSingleton<IJWTServiceSettings, JWTServiceSettings>();
         //    services.AddSingleton<ITokenHandler, JWTTokenHandler>();
         //    services.AddScoped<IJWTUserManager, JWTUserManager>();
         //    return services;

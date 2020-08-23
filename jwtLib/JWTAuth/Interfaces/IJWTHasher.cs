@@ -1,7 +1,9 @@
-﻿namespace jwtLib.JWTAuth.Interfaces
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace jwtLib.JWTAuth.Interfaces
 {
     public interface IJWTHasher
     {
-        string GetHash(string token);
+        string GetHash([NotNull] string token);
     }
 }

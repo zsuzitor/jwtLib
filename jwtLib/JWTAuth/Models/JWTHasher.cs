@@ -8,7 +8,10 @@ namespace jwtLib.JWTAuth.Models
     {
         public string GetHash(string token)
         {
-
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return null;
+            }
             // generate a 128-bit salt using a secure PRNG
             //byte[] salt = new byte[128 / 8];
             //using (var rng = RandomNumberGenerator.Create())

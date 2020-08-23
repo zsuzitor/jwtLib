@@ -74,8 +74,8 @@ namespace jwtLibUsage.Example
 
         public bool ItIsUserClaims([NotNull] IEnumerable<Claim> claims, [NotNull] string userId)
         {
-            var claimId = claims.FirstOrDefault(x => x.Type == _userIdClaimName);
-            if (claimId == null)
+            var claimId = claims?.FirstOrDefault(x => x.Type == _userIdClaimName);
+            if (claimId == null || userId == null)
             {
                 return false;
             }
