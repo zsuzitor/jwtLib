@@ -40,6 +40,7 @@ namespace jwtLib.JWTAuth.Interfaces
         string GetIdFromClaims([NotNull] ClaimsPrincipal claims);
         string GetIdFromClaims([NotNull] IEnumerable<Claim> claims);
 
-
+        Task<IJWTUser> GetUserById([NotNull] string userId);
+        Task<bool> DeleteRefreshTokenFromUserAsync([NotNull] string userId);
     }
 }

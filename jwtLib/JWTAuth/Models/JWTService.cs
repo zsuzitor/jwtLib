@@ -260,5 +260,13 @@ namespace jwtLib.JWTAuth.Models
 
         }
 
+        public virtual async Task<IJWTUser> GeUserByAccessTokenAsync([NotNull] string accessToken)
+        {
+            var userId = GetUserIdFromAccessToken(accessToken);
+
+            return await _JWTUserManager.GetUserById(userId);
+
+        }
+
     }
 }

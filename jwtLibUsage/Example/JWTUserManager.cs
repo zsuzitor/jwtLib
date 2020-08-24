@@ -143,5 +143,21 @@ namespace jwtLibUsage.Example
 
             return true;
         }
+
+        public async Task<IJWTUser> GetUserById([NotNull] string userId)
+        {
+            return _db.Users.FirstOrDefault(x => x.Id == userId);
+        }
+
+        public async Task<bool> DeleteRefreshTokenFromUserAsync([NotNull] string userId)
+        {
+            var user = _db.Users.FirstOrDefault(x1 => x1.Id == userId);
+            if (user == null)
+                return false;
+            user.RefreshTokenHash = null;
+            return true;
+        }
+
     }
+
 }

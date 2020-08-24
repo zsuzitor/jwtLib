@@ -21,5 +21,8 @@ namespace jwtLib.JWTAuth.Interfaces
         ClaimsPrincipal GetClaimsFromAccessToken([NotNull] string authorizationToken, out SecurityToken tokenSecure);
         ClaimsPrincipal GetClaimsFromRefreshToken([NotNull] string authorizationToken, out SecurityToken tokenSecure);
         Task<IJWTUser> GetUserByRefreshTokenAsync([NotNull] string userId, [NotNull] string refreshToken);
+        Task<IJWTUser> GeUserByAccessTokenAsync( [NotNull] string accessToken);
+       
+
     }
 }
