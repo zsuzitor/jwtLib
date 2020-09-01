@@ -180,7 +180,7 @@ namespace jwtLib.JWTAuth.Models
             return await _JWTUserManager.DeleteRefreshTokenFromUserAsync(userId, refreshToken);
         }
 
-        public virtual string GenerateRefreshToken(IJWTUser user)
+        public virtual string GenerateRefreshToken([NotNull] IJWTUser user)
         {
             var identity = _JWTUserManager.GetIdentity(user, _settings.AuthenticationType);
             if (identity == null)
@@ -189,19 +189,19 @@ namespace jwtLib.JWTAuth.Models
             return GenerateRefreshToken(identity);
         }
 
-        public virtual string GenerateRefreshToken(ClaimsIdentity identity)
+        public virtual string GenerateRefreshToken([NotNull] ClaimsIdentity identity)
         {
             return _tokenHandler.GenerateToken(
                 identity, _settings.LifetimeRefreshToken, _settings.KeyForRefreshToken);
         }
 
 
-        public virtual ClaimsPrincipal GetClaimsFromAccessToken(string authorizationToken, out SecurityToken tokenSecure)
+        public virtual ClaimsPrincipal GetClaimsFromAccessToken([NotNull] string authorizationToken, out SecurityToken tokenSecure)
         {
             return _tokenHandler.GetClaimsFromToken(authorizationToken, _settings.KeyForAccessToken, out tokenSecure);
         }
 
-        public virtual ClaimsPrincipal GetClaimsFromRefreshToken(string authorizationToken, out SecurityToken tokenSecure)
+        public virtual ClaimsPrincipal GetClaimsFromRefreshToken([NotNull] string authorizationToken, out SecurityToken tokenSecure)
         {
             return _tokenHandler.GetClaimsFromToken(authorizationToken, _settings.KeyForRefreshToken, out tokenSecure);
         }
