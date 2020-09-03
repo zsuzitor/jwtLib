@@ -59,7 +59,7 @@ namespace jwtLibUsage
             //_JWTService.GetUserIdFromRefreshTokenAsync
 
             var tokenData = _JWTService.GetCurrentDataFromToken(tokens.AccessToken, jwtServiceSettings.KeyForAccessToken);
-            if( tokenData?.Status!=jwtLib.JWTAuth.Enums.AuthorizeStatus.Good)
+            if (tokenData?.Status != jwtLib.JWTAuth.Enums.AuthorizeStatus.Good)
             {
                 //error
             }

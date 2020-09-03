@@ -22,10 +22,8 @@ namespace jwtLib.JWTAuth.Models
         //private IJWTHasher _hasher;
         private readonly ITokenHandler _tokenHandler;
 
-        //private 
 
-
-        public JWTService(IJWTUserManager JWTUserManager, IJWTServiceSettings settings, //IJWTHasher hasher,
+        public JWTService(IJWTUserManager JWTUserManager, IJWTServiceSettings settings,
             ITokenHandler tokenHandler)
         {
             _JWTUserManager = JWTUserManager;

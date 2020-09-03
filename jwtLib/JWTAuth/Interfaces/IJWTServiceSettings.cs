@@ -11,6 +11,5 @@
 
         string AuthenticationType { get; } // tpye for ClaimsIdentity
 
-
     }
 }

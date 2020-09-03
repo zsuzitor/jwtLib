@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using jwtLib.JWTAuth.Interfaces;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
@@ -6,7 +7,7 @@ namespace jwtLib.JWTAuth.Models
 {
     public class JWTHasher : IJWTHasher
     {
-        public string GetHash(string token)
+        public string GetHash([NotNull] string token)
         {
             if (string.IsNullOrWhiteSpace(token))
             {

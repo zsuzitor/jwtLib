@@ -9,7 +9,7 @@ namespace jwtLib.JWTAuth.Interfaces
     {
         string GenerateToken([NotNull] ClaimsIdentity identity, int lifeTimeInMinute, [NotNull] string key);
         //string GenerateRefreshToken(string userId);
-        ClaimsPrincipal GetClaimsFromToken([NotNull] string authorizationToken, 
+        ClaimsPrincipal GetClaimsFromToken([NotNull] string authorizationToken,
             [NotNull] string key, [NotNull] out SecurityToken tokenSecure);
 
         JwtSecurityToken DecodeToken([NotNull] string token);
