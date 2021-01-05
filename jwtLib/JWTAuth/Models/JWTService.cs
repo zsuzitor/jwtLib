@@ -249,7 +249,7 @@ namespace jwtLib.JWTAuth.Models
         /// <param name="userId"></param>
         /// <param name="refreshToken"></param>
         /// <returns></returns>
-        public virtual bool ValidateRefreshToken([NotNull] string userId, [NotNull] string refreshToken)//todo exception
+        public virtual bool ValidateRefreshToken([NotNull] string userId, [NotNull] string refreshToken)
         {
             if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(refreshToken))
             {
@@ -322,7 +322,7 @@ namespace jwtLib.JWTAuth.Models
             var decoded = GetCurrentDataFromToken(accessToken, _settings.KeyForAccessToken);
             if (decoded == null || (decoded.Status != AuthorizeStatus.Good && decoded.Status != AuthorizeStatus.ExpiredToken))
             {
-                return null;//todo
+                throw new JwtAuthBadToken();
             }
 
             string userId = _JWTUserManager.GetIdFromClaims(decoded.Claims);

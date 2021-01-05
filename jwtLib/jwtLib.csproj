@@ -1,13 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.0.2</Version>
+    <Version>0.0.3</Version>
     <Authors>zsuzitor</Authors>
     <Company>zsuzitor</Company>
     <Product>zsuzitor</Product>
-    <Description>for start, realize: IJWTUserManager, IJWTSettings, IJWTUser. Parent class:JWTService. can use default realization: IJWTHasher-&gt;JWTHasher, ITokenHandler-&gt;TokenHandler, IJWTService-&gt;JWTService</Description>
+    <Description>for start, realize: IJWTUserManager, IJWTSettings, IJWTServiceSettings, IJWTUser. Parent class:JWTService. can use default realization: IJWTHasher-&gt;JWTHasher, ITokenHandler-&gt;TokenHandler, IJWTService-&gt;JWTService</Description>
     <PackageId>jwtLib_zsuzitor</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>

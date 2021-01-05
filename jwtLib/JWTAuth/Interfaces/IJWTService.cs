@@ -9,7 +9,7 @@ namespace jwtLib.JWTAuth.Interfaces
 {
     public interface IJWTService
     {
-        Task<AllTokens> RefreshAsync([NotNull] string userId, [NotNull] string refreshToken);
+        Task<AllTokens> RefreshAsync([NotNull] string userId, [NotNull] string oldRefreshToken);
         Task<AllTokens> CreateAndSetNewTokensAsync([NotNull] IJWTUser user);
         bool ValidateRefreshToken([NotNull] string userId, [NotNull] string refreshToken);
         TokenData GetCurrentDataFromToken([NotNull] string authorizationToken, [NotNull] string key);
@@ -22,6 +22,7 @@ namespace jwtLib.JWTAuth.Interfaces
         ClaimsPrincipal GetClaimsFromRefreshToken([NotNull] string authorizationToken, out SecurityToken tokenSecure);
         Task<IJWTUser> GetUserByRefreshTokenAsync([NotNull] string userId, [NotNull] string refreshToken);
         Task<IJWTUser> GeUserByAccessTokenAsync([NotNull] string accessToken);
+        string GetUserIdFromAccessTokenIfCan([NotNull] string accessToken);
 
     }
 }
