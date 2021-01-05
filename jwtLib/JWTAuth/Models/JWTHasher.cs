@@ -7,11 +7,17 @@ namespace jwtLib.JWTAuth.Models
 {
     public class JWTHasher : IJWTHasher
     {
+        /// <summary>
+        /// 
+        /// exc: ArgumentNullException
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
         public string GetHash([NotNull] string token)
         {
             if (string.IsNullOrWhiteSpace(token))
             {
-                return null;
+                throw new ArgumentNullException();
             }
             // generate a 128-bit salt using a secure PRNG
             //byte[] salt = new byte[128 / 8];

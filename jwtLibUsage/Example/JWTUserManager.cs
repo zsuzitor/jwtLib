@@ -90,14 +90,14 @@ namespace jwtLibUsage.Example
 
         public string GetIdFromClaims([NotNull] ClaimsPrincipal claims)
         {
-            return GetIdFromClaims(claims.Claims);
+            return GetIdFromClaims(claims?.Claims);
 
         }
 
         public string GetIdFromClaims([NotNull] IEnumerable<Claim> claims)
         {
             //ClaimsIdentity.DefaultNameClaimType
-            return claims.FirstOrDefault(x1 => x1.Type == _userIdClaimName)?.Value;
+            return claims?.FirstOrDefault(x1 => x1.Type == _userIdClaimName)?.Value;
         }
 
 
