@@ -42,7 +42,7 @@ namespace jwtLib.JWTAuth.Models
             tokenSecure = null;
             if (string.IsNullOrWhiteSpace(authorizationToken) || string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException($"{nameof(this.GetClaimsFromToken)} null params");
             }
 
             var keyBytes = Encoding.ASCII.GetBytes(key);

@@ -2,6 +2,9 @@
 
 namespace jwtLib.Exceptions
 {
+    /// <summary>
+    /// parrent for all custom jwt exception
+    /// </summary>
     class JwtAuthMainException : Exception
     {
         public JwtAuthMainException() : base()

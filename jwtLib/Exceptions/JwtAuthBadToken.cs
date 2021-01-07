@@ -2,6 +2,10 @@
 
 namespace jwtLib.Exceptions
 {
+
+    /// <summary>
+    /// not valide\bad token
+    /// </summary>
     class JwtAuthBadToken : JwtAuthMainException
     {
         public JwtAuthBadToken() : base()

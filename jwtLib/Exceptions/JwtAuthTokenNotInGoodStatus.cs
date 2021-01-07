@@ -3,6 +3,9 @@ using System;
 
 namespace jwtLib.Exceptions
 {
+    /// <summary>
+    /// not in AuthorizeStatus.Good status
+    /// </summary>
     class JwtAuthTokenNotInGoodStatus : JwtAuthMainException
     {
         public JwtAuthTokenNotInGoodStatus() : base()

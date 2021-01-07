@@ -64,6 +64,8 @@ namespace jwtLibUsage
                 //error
             }
 
+            _JWTService.GetUserIdFromAccessTokenIfCan("asddd.czxc.ffds");
+
             var newTokens = _JWTService.RefreshAsync(user1.Id, tokens.RefreshToken).Result;
             _JWTService.DeleteRefreshTokenFromUserAsync("1", newTokens.RefreshToken).Wait();
 

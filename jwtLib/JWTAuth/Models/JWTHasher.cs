@@ -17,7 +17,7 @@ namespace jwtLib.JWTAuth.Models
         {
             if (string.IsNullOrWhiteSpace(token))
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException($"JWTHasher-{nameof(this.GetHash)}-token");
             }
             // generate a 128-bit salt using a secure PRNG
             //byte[] salt = new byte[128 / 8];

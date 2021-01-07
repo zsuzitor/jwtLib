@@ -51,7 +51,7 @@ namespace jwtLib.JWTAuth.Models
             var user = await _JWTUserManager.GetWithRefreshTokenAsync(userId, oldRefreshToken);
             if (user == null)
             {
-                throw new JwtAuthUserNotFound();
+                throw new JwtAuthUserNotFound($"JWTUserManager {nameof(_JWTUserManager.GetWithRefreshTokenAsync)} return null");
             }
 
             return await CreateAndSetNewTokensAsync(user);
@@ -73,20 +73,20 @@ namespace jwtLib.JWTAuth.Models
         {
             if (user == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException($"JWTService {nameof(this.CreateAndSetNewTokensAsync)} - user is null");
             }
 
             var identity = _JWTUserManager.GetIdentity(user, _settings.AuthenticationType);
             if (identity == null)
             {
-                throw new JwtAuthIdentityDataIsBad();
+                throw new JwtAuthIdentityDataIsBad($"JWTUserManager {nameof(_JWTUserManager.GetIdentity)} return null");
             }
 
             string refToken = GenerateRefreshToken(identity);
             //string refTokenHash = _hasher.GetHashRefreshToken(refToken);
             if (!await _JWTUserManager.SetRefreshTokenAsync(user, refToken))
             {
-                throw new JwtAuthCantSetRefreshToken();
+                throw new JwtAuthCantSetRefreshToken($"JWTUserManager {nameof(_JWTUserManager.SetRefreshTokenAsync)} return false");
             }
 
             string accessToken = _tokenHandler.GenerateToken(
@@ -111,7 +111,7 @@ namespace jwtLib.JWTAuth.Models
             try
             {
                 if (string.IsNullOrWhiteSpace(authorizationToken) || string.IsNullOrWhiteSpace(key))
-                    throw new ArgumentNullException();
+                    throw new ArgumentNullException($"JWTService {nameof(this.GetCurrentDataFromToken)} null params");
 
                 TokenData res = new TokenData
                 {
@@ -123,12 +123,12 @@ namespace jwtLib.JWTAuth.Models
 
 
                 if (claims == null || claims.Count == 0)
-                    throw new JwtAuthIdentityDataIsBad($"error when {nameof(_tokenHandler.GetClaimsFromToken)} return null");
+                    throw new JwtAuthIdentityDataIsBad($"error when {nameof(_tokenHandler.GetClaimsFromToken)} return null or 0 count");
 
                 res.UserId = _JWTUserManager.GetIdFromClaims(claims);
 
                 if (string.IsNullOrWhiteSpace(res.UserId))
-                    throw new JwtAuthIdentityDataIsBad($"error when {nameof(_JWTUserManager.GetIdFromClaims)} return null");
+                    throw new JwtAuthIdentityDataIsBad($"error when JWTUserManager {nameof(_JWTUserManager.GetIdFromClaims)} return null or empty");
 
                 res.Claims = claims;
                 res.Status = AuthorizeStatus.Good;
@@ -144,8 +144,7 @@ namespace jwtLib.JWTAuth.Models
                 var token = _tokenHandler.DecodeToken(authorizationToken);
                 res.UserId = _JWTUserManager.GetIdFromClaims(token.Claims);
                 res.Claims = token.Claims.ToList();
-
-
+                return res;
             }
             catch (SecurityTokenValidationException) //changed\broken\bad
             {
@@ -191,12 +190,12 @@ namespace jwtLib.JWTAuth.Models
         {
             if (user == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException($"JWTService {nameof(this.GenerateRefreshToken)} null params");
             }
 
             var identity = _JWTUserManager.GetIdentity(user, _settings.AuthenticationType);
             if (identity == null)
-                throw new JwtAuthIdentityDataIsBad();
+                throw new JwtAuthIdentityDataIsBad($"JWTUserManager {nameof(_JWTUserManager.GetIdentity)} return null");
 
             return GenerateRefreshToken(identity);
         }
@@ -212,7 +211,7 @@ namespace jwtLib.JWTAuth.Models
         {
             if (identity == null)
             {
-                throw new JwtAuthIdentityDataIsBad();
+                throw new JwtAuthIdentityDataIsBad($"JWTService {nameof(this.GenerateRefreshToken)} null params");
             }
 
             return _tokenHandler.GenerateToken(
@@ -225,7 +224,7 @@ namespace jwtLib.JWTAuth.Models
             var claims = _tokenHandler.GetClaimsFromToken(authorizationToken, _settings.KeyForAccessToken, out tokenSecure);
             if (claims == null)
             {
-                throw new JwtAuthIdentityDataIsBad();
+                throw new JwtAuthIdentityDataIsBad($"{nameof(_tokenHandler.GetClaimsFromToken)} return null");
             }
 
             return claims;
@@ -236,7 +235,7 @@ namespace jwtLib.JWTAuth.Models
             var claims = _tokenHandler.GetClaimsFromToken(authorizationToken, _settings.KeyForRefreshToken, out tokenSecure);
             if (claims == null)
             {
-                throw new JwtAuthIdentityDataIsBad();
+                throw new JwtAuthIdentityDataIsBad($"{nameof(_tokenHandler.GetClaimsFromToken)} return null");
             }
 
             return claims;
@@ -253,20 +252,20 @@ namespace jwtLib.JWTAuth.Models
         {
             if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(refreshToken))
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException($"JWTService {nameof(this.ValidateRefreshToken)} null params");
             }
 
             var decoded = GetCurrentDataFromToken(refreshToken, _settings.KeyForRefreshToken);
             if (decoded?.Status != AuthorizeStatus.Good)
             {
-                throw new JwtAuthNotValideRefreshToken();
+                throw new JwtAuthNotValideRefreshToken($"JWTService {nameof(this.GetCurrentDataFromToken)} return null");
             }
 
             var successCompare = _JWTUserManager.ItIsUserClaims(decoded.Claims, userId);
 
             if (!successCompare)
             {
-                throw new JwtAuthIdentityDataIsBad();
+                throw new JwtAuthIdentityDataIsBad($"JWTUserManager {nameof(_JWTUserManager.ItIsUserClaims)} return false");
             }
 
             return true;
@@ -277,13 +276,13 @@ namespace jwtLib.JWTAuth.Models
             var decoded = GetCurrentDataFromToken(refreshToken, _settings.KeyForRefreshToken);
             if (decoded?.Status != AuthorizeStatus.Good)
             {
-                throw new JwtAuthTokenNotInGoodStatus();
+                throw new JwtAuthTokenNotInGoodStatus($"JWTService {nameof(this.GetUserIdFromRefreshToken)} decoded token not in good status");
             }
 
             var userId = _JWTUserManager.GetIdFromClaims(decoded.Claims);
             if (string.IsNullOrWhiteSpace(userId))
             {
-                throw new JwtAuthCantGetUserId();
+                throw new JwtAuthCantGetUserId($"JWTUserManager {nameof(_JWTUserManager.GetIdFromClaims)} return null or empty userId");
             }
 
             return userId;
@@ -299,13 +298,13 @@ namespace jwtLib.JWTAuth.Models
             var decoded = GetCurrentDataFromToken(accessToken, _settings.KeyForAccessToken);
             if (decoded?.Status != AuthorizeStatus.Good)
             {
-                throw new JwtAuthTokenNotInGoodStatus();
+                throw new JwtAuthTokenNotInGoodStatus($"JWTService {nameof(this.GetUserIdFromRefreshToken)} decoded token not in good status");
             }
 
             string userId = _JWTUserManager.GetIdFromClaims(decoded.Claims);
             if (string.IsNullOrWhiteSpace(userId))
             {
-                throw new JwtAuthCantGetUserId();
+                throw new JwtAuthCantGetUserId($"JWTUserManager {nameof(_JWTUserManager.GetIdFromClaims)} return null or empty userId");
             }
 
             return userId;
@@ -322,18 +321,25 @@ namespace jwtLib.JWTAuth.Models
             var decoded = GetCurrentDataFromToken(accessToken, _settings.KeyForAccessToken);
             if (decoded == null || (decoded.Status != AuthorizeStatus.Good && decoded.Status != AuthorizeStatus.ExpiredToken))
             {
-                throw new JwtAuthBadToken();
+                throw new JwtAuthBadToken($"JWTService {nameof(this.GetCurrentDataFromToken)} return null or token in bad status");
             }
 
             string userId = _JWTUserManager.GetIdFromClaims(decoded.Claims);
             if (string.IsNullOrWhiteSpace(userId))
             {
-                throw new JwtAuthCantGetUserId();
+                throw new JwtAuthCantGetUserId($"JWTUserManager {nameof(_JWTUserManager.GetIdFromClaims)} return null or empty userId");
             }
 
             return userId;
         }
 
+
+        /// <summary>
+        /// validate token and return JWTUserManager.GetWithRefreshTokenAsync result
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="refreshToken"></param>
+        /// <returns></returns>
         public virtual async Task<IJWTUser> GetUserByRefreshTokenAsync([NotNull] string userId, [NotNull] string refreshToken)
         {
             if (!ValidateRefreshToken(userId, refreshToken))
@@ -352,6 +358,12 @@ namespace jwtLib.JWTAuth.Models
 
         }
 
+
+        /// <summary>
+        /// return JWTUserManager.GetWithRefreshTokenAsync result
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <returns></returns>
         public virtual async Task<IJWTUser> GeUserByAccessTokenAsync([NotNull] string accessToken)
         {
             var userId = GetUserIdFromAccessToken(accessToken);
@@ -364,6 +376,5 @@ namespace jwtLib.JWTAuth.Models
             return user;
 
         }
-
     }
 }
