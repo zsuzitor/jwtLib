@@ -1,5 +1,5 @@
 ConfigureAwait  use?
 unit test?
 
-
+попробовать засунуть в линкс контейнер, или запустить на линуксе. проверить вообще пакеты с ним совместимы или нет
 swap  to??? https://codeburst.io/jwt-auth-in-asp-net-core-148fb72bed03
