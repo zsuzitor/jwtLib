@@ -1,2 +1,5 @@
-ConfigureAwait  использовать?
+ConfigureAwait  use?
 unit test?
+
+
+swap  to??? https://codeburst.io/jwt-auth-in-asp-net-core-148fb72bed03
