@@ -10,6 +10,17 @@ namespace jwtLibUsage
     {
         static void Main(string[] args)
         {
+            var hasher = new JWTHasher();
+            var s1 = hasher.GenerateSalt();
+            var s2 = hasher.GenerateSalt("1233");
+            var secret = "secret";
+
+            var h1 = hasher.GetHash(secret, s1);
+            var h2 = hasher.GetHash(secret, s2);
+            var r1 = hasher.VerifySaltHash(secret, h1);
+            var r2 = hasher.VerifySaltHash(secret, h2);
+
+
             //TODO при рефреше надо проверить токен
             string pshash = "111u".GetHashCode().ToString();
 
