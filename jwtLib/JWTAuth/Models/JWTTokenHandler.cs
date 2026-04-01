@@ -18,7 +18,7 @@ namespace jwtLib.JWTAuth.Models
 
         public virtual SymmetricSecurityKey GetSymmetricSecurityKey(string key)
         {
-            return new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key));
+            return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
         }
 
         public virtual string GenerateToken(ClaimsIdentity identity, int lifeTimeInMinute, string key)
@@ -45,7 +45,7 @@ namespace jwtLib.JWTAuth.Models
                 throw new ArgumentNullException($"{nameof(this.GetClaimsFromToken)} null params");
             }
 
-            var keyBytes = Encoding.ASCII.GetBytes(key);
+            var keyBytes = Encoding.UTF8.GetBytes(key);
             var handler = new JwtSecurityTokenHandler();
             var validations = new TokenValidationParameters
             {
